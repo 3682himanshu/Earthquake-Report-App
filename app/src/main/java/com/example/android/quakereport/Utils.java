@@ -41,8 +41,8 @@ public final class Utils {
         InputStream inputStream=null;
         try {
             urlConnection=(HttpsURLConnection)url.openConnection();
-            urlConnection.setReadTimeout(10000);
-            urlConnection.setConnectTimeout(10000);
+            urlConnection.setReadTimeout(1000);
+            urlConnection.setConnectTimeout(1000);
             urlConnection.setRequestMethod("GET");
             urlConnection.connect();
 

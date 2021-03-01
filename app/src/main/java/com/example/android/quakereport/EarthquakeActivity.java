@@ -91,6 +91,8 @@ public class EarthquakeActivity extends AppCompatActivity implements LoaderManag
 
     @Override
     public void onLoadFinished(Loader<ArrayList<EarthQuakelist>> loader, ArrayList<EarthQuakelist> earthquakes) {
+        View loadingIndicator = findViewById(R.id.loading_indicator);
+        loadingIndicator.setVisibility(View.GONE);
         // Clear the adapter of previous earthquake data
         mEmptyStateTextView.setText(R.string.no_earthquakes);
         if(adapter!=null)
