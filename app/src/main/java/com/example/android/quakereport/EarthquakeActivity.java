@@ -15,7 +15,9 @@
  */
 package com.example.android.quakereport;
 
+import android.app.LoaderManager;
 import android.content.Intent;
+import android.content.Loader;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -29,9 +31,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 
 
-public class EarthquakeActivity extends AppCompatActivity {
+public class EarthquakeActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<ArrayList<EarthQuakelist>> {
+    private static final int EARTHQUAKE_LOADER_ID = 1;
     private static final String USGS_REQUEST_URL =
-            "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2020-01-01&minmagnitude=3&minlatitude=8.4&maxlatitude=37.6&minlongitude=68.7&maxlongitude=97.25&orderby=time&limit=50";
+            "https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=2020-01-01&minmagnitude=3&minlatitude=8.4&maxlatitude=37.6&minlongitude=68.7&maxlongitude=97.25&orderby=time&limit=100";
     public static final String LOG_TAG = EarthquakeActivity.class.getName();
     MyAdapter adapter;
     ListView earthquakeListView;
@@ -53,9 +56,16 @@ public class EarthquakeActivity extends AppCompatActivity {
                 startActivity(websiteIntent);
             }
         });
+        // Get a reference to the LoaderManager, in order to interact with loaders.
+        LoaderManager loaderManager = getLoaderManager();
 
-        EarthquakeAsync task=new EarthquakeAsync();
-        task.execute(USGS_REQUEST_URL);
+        // Initialize the loader. Pass in the int ID constant defined above and pass in null for
+        // the bundle. Pass in this activity for the LoaderCallbacks parameter (which is valid
+        // because this activity implements the LoaderCallbacks interface)
+        System.out.println("Hello");
+        loaderManager.initLoader(EARTHQUAKE_LOADER_ID, null, this);
+//        EarthquakeAsync task=new EarthquakeAsync();
+//        task.execute(USGS_REQUEST_URL);
 
     }
     private void updateUi(ArrayList<EarthQuakelist> data)
@@ -67,6 +77,33 @@ public class EarthquakeActivity extends AppCompatActivity {
         // so the list can be populated in the user interface
         earthquakeListView.setAdapter(adapter);
     }
+
+    @Override
+    public Loader<ArrayList<EarthQuakelist>> onCreateLoader(int id, Bundle args) {
+        // Create a new loader for the given URL
+        return new EarthquakeLoader(this, USGS_REQUEST_URL);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<ArrayList<EarthQuakelist>> loader, ArrayList<EarthQuakelist> earthquakes) {
+        // Clear the adapter of previous earthquake data
+        if(adapter!=null)
+        adapter.clear();
+
+        // If there is a valid list of {@link Earthquake}s, then add them to the adapter's
+        // data set. This will trigger the ListView to update.
+        if (earthquakes != null && !earthquakes.isEmpty()) {
+            updateUi(earthquakes);
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<ArrayList<EarthQuakelist>> loader) {
+        if(adapter!=null)
+        adapter.clear();
+    }
+
+
     public class EarthquakeAsync extends AsyncTask<String,Void,ArrayList<EarthQuakelist>>
     {
 
